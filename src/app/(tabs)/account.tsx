@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 
 import React, { useEffect, useState } from 'react'
 import { useAuthContext } from '@/hooks/use-auth-context'
 import AccountField from '@/components/account/account-field'
-import SignOutButton from '@/components/auth-buttons/sign-out-button'
+import SignOutButton from '@/components/auth/sign-out-button'
 import Spacer from '@/components/utility/spacer'
 import { supabase } from '@/services/supabase'
 import { router } from 'expo-router'

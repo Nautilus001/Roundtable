@@ -13,29 +13,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     async function fetchUserDataAndClaims(isFirstRun=false) {
         setLoading(true)
-        try { 
-            const data = (await getAuthSessionData()).data
-    
-            if (data && data.claims) {
-                setClaims(data.claims)
 
-                const { data: profileData, error } = await fetchProfile(data.claims.sub)
-                
-                if (error) {
-                    console.error("Error fetching profile:", error)
-                }
-                
-                setProfile(profileData)
-            } else {
-                setClaims(null)
-                setProfile(null)
-            }
-        } catch (error: any) {
-            console.error("Unexpected error in fetchUserDataAndClaims:", error)
-        } finally {
-            setLoading(false)
-            if (isFirstRun) setIsInitialized(true)
+        const { data, error } = (await getAuthSessionData())
+
+        if(error) {
+            console.error("Get Session Data failed: ", error)
+            setClaims(null)
+            setProfile(null)
+            return
         }
+
+        if (data && data.claims) {
+            setClaims(data.claims)
+
+            const { data: profileData, error } = await fetchProfile(data.claims.sub)
+            
+            if (error) {
+                console.error("Error fetching profile:", error)
+            }
+            
+            setProfile(profileData)
+        }
+
+        if (isFirstRun) setIsInitialized(true)
+        setLoading(false)
     }
 
     useEffect(() => {
@@ -51,16 +52,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, [])
 
     async function register(emailParam: string, passwordParam: string) {
-        try {
             setLoading(true)
-            await signUpWithEmail(emailParam, passwordParam)
-            const data = await signInWithEmail(emailParam, passwordParam)
-            return { data, error: null }
-        } catch (e: any) {
-            throw Error(e.message)
-        } finally {
+            const {data, error} = await signUpWithEmail(emailParam, passwordParam)
+            if(error) console.error("Error in register signing up with email")
+            const {data: d, error: e} = await signInWithEmail(emailParam, passwordParam)
+            if(error) console.error("Error in register signing in with email")
             setLoading(false)
-        }
+            return { d, error: null }
     }
 
     async function login(emailParam: string, passwordParam: string) {

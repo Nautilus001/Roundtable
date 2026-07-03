@@ -33,8 +33,9 @@ export default function LoginScreen() {
         router.replace("/getting-started")
       } catch (error: any) {
         setError(error.message)
+        console.error(error.message)
         showToast({
-            message: e ?? "",
+            message: error.message ?? "",
             severity: 1,
             timeout: 1000
         })
@@ -46,6 +47,12 @@ export default function LoginScreen() {
         router.replace("/account")
       } catch (error: any) {
         setError(error.message)
+        console.error(error.message)
+        showToast({
+            message: error.message ?? "",
+            severity: 1,
+            timeout: 1000
+        })
       }
     }
   }
