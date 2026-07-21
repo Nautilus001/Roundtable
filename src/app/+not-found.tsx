@@ -1,32 +1,35 @@
 import { StyleSheet, Text, TouchableOpacity, View, StatusBar } from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const NotFound = () => {
   const router = useRouter()
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      
-      <View style={styles.textContainer}>
-        <Text style={styles.errorCode}>404</Text>
-        <Text style={styles.title}>Page Not Found</Text>
-        <Text style={styles.subtitle}>
-          The page you are looking for might have been moved, deleted, or doesn't exist.
-        </Text>
-      </View>
+    <SafeAreaView>
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        
+        <View style={styles.textContainer}>
+          <Text style={styles.errorCode}>404</Text>
+          <Text style={styles.title}>Page Not Found</Text>
+          <Text style={styles.subtitle}>
+            The page you are looking for might have been moved, deleted, or doesn't exist.
+          </Text>
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={styles.primaryButton} 
-          onPress={() => router.replace("/")}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.primaryButtonText}>Go to Home</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.primaryButton} 
+            onPress={() => router.replace("/")}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryButtonText}>Go to Home</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

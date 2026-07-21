@@ -10,4 +10,5 @@ export interface Gathering {
     attire: Attire
     event_code?: string
     role?: EventRole
+    active?: boolean
 }

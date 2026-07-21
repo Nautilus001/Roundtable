@@ -22,7 +22,22 @@ export async function fetchProfile(userID: string) {
         .select('*')
         .eq('id', userID)
         .maybeSingle()
-    return {data, error}
+    return { data, error }
+}
+
+export async function fetchEventAttendeesWithRoles(eventID: string) {
+    const { data, error } = await supabase
+        .from('roles')
+        .select(`
+            role,
+            profiles (
+                first_name,
+                last_name
+            )
+        `)
+        .eq('event_id', eventID)
+    
+    return { data, error }
 }
 
 export async function deleteProfile(userID: string) {

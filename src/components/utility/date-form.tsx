@@ -12,12 +12,16 @@ export const DateForm: React.FC<DateFormProps> = ({ date, onChange, label = "Dat
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false)
 
+    const parsedDate = date ? new Date(date) : null;
+
+    if (!parsedDate || isNaN(parsedDate.getTime())) return '';
+
     const onDateChange = (event: any, selectedDate?: Date) => {
         if (Platform.OS === 'android') {
             setShowDatePicker(false)
         }
         if (selectedDate) {
-            const newDate = new Date(date)
+            const newDate = new Date(parsedDate)
             newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
             onChange(newDate)
         }
@@ -28,7 +32,7 @@ export const DateForm: React.FC<DateFormProps> = ({ date, onChange, label = "Dat
             setShowTimePicker(false)
         }
         if (selectedTime) {
-            const newDate = new Date(date)
+            const newDate = new Date(parsedDate)
             newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes())
             onChange(newDate)
         }
@@ -40,30 +44,30 @@ export const DateForm: React.FC<DateFormProps> = ({ date, onChange, label = "Dat
 
             {Platform.OS === 'ios' ? (
                 <View style={styles.iosPickerContainer}>
-                    <DatePicker value={date} mode="date" onChange={onDateChange} />
-                    <DatePicker value={date} mode="time" onChange={onTimeChange} />
+                    <DatePicker value={parsedDate} mode="date" onChange={onDateChange} />
+                    <DatePicker value={parsedDate} mode="time" onChange={onTimeChange} />
                 </View>
             ) : Platform.OS === 'android' ? (
                 <View style={styles.androidPickerContainer}>
                     <TouchableOpacity style={styles.pickerButton} onPress={() => setShowDatePicker(true)}>
                         <Text style={styles.pickerButtonText}>
-                            {date.toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                            {parsedDate.toLocaleDateString(undefined, { dateStyle: 'medium' })}
                         </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.pickerButton} onPress={() => setShowTimePicker(true)}>
                         <Text style={styles.pickerButtonText}>
-                            {date.toLocaleTimeString(undefined, { timeStyle: 'short' })}
+                            {parsedDate.toLocaleTimeString(undefined, { timeStyle: 'short' })}
                         </Text>
                     </TouchableOpacity>
 
-                    {showDatePicker && <DatePicker value={date} mode="date" onChange={onDateChange} />}
-                    {showTimePicker && <DatePicker value={date} mode="time" onChange={onTimeChange} />}
+                    {showDatePicker && <DatePicker value={parsedDate} mode="date" onChange={onDateChange} />}
+                    {showTimePicker && <DatePicker value={parsedDate} mode="time" onChange={onTimeChange} />}
                 </View>
             ) : (
                 <View style={styles.webPickerContainer}>
-                    <DatePicker value={date} mode="date" onChange={onDateChange} />
-                    <DatePicker value={date} mode="time" onChange={onTimeChange} />
+                    <DatePicker value={parsedDate} mode="date" onChange={onDateChange} />
+                    <DatePicker value={parsedDate} mode="time" onChange={onTimeChange} />
                 </View>
             )}
         </View>

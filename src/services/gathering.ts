@@ -1,10 +1,21 @@
-import {Gathering} from "@/models/gathering"
+import {EventRole, Gathering} from "@/models/gathering"
 import { supabase } from "./supabase"
 
 interface GatheringsReturnType {
     data: Gathering[] | null
     error: Error | null
 }
+
+interface JoinEventReturnType {
+    data: {
+        success: boolean,
+        message: string
+        role?: EventRole
+        event_id?: string
+    } | null
+    error: Error | null
+}
+
 
 export async function getGatherings(profile_id: string): Promise<GatheringsReturnType> {
 
@@ -19,7 +30,8 @@ export async function getGatherings(profile_id: string): Promise<GatheringsRetur
                 start_time,
                 location,
                 attire,
-                event_code
+                event_code,
+                active
             )
         `)
         .eq('profile_id', profile_id)
@@ -43,11 +55,28 @@ export async function getGatherings(profile_id: string): Promise<GatheringsRetur
                     location: gathering.location,
                     attire: gathering.attire,
                     event_code: gathering.event_code,
-                    role: item.role
+                    role: item.role,
+                    active: gathering.active
                 }
             }),
         error: null
     }
+}
+
+export async function joinEventByCode(eventCode: string) : Promise<JoinEventReturnType>{
+    const { data, error } = await supabase.rpc('join_event_by_code', {
+        p_event_code: eventCode
+    });
+
+    if (error) {
+    console.error('RPC Error:', error.message);
+    } else if (!data.success) {
+    console.warn('Action failed:', data.message);
+    } else {
+    console.log('Successfully joined event:', data.event_id);
+    }
+
+    return { data, error }
 }
 
 export async function postGathering(payload: Gathering) : Promise<GatheringsReturnType>{

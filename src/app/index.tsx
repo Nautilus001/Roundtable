@@ -6,6 +6,7 @@ import LogoFork from '@/components/visual/logo-fork'
 import LogoDrink from '@/components/visual/logo-drink'
 import LogoFork2 from '@/components/visual/logo-fork-2'
 import LogoNegFork from '@/components/visual/logo-fork-negative'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
@@ -51,50 +52,52 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView  style={styles.container}>
+      <View>
 
-      <View style={styles.logoContainer}>
-        <TouchableOpacity onPress={handleRotate}>
-          {logos[logo]}
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
+        <View style={styles.logoContainer}>
+          <TouchableOpacity onPress={handleRotate}>
+            {logos[logo]}
+          </TouchableOpacity>
+        </View>
         
+        <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>{isRegister ? "Sign Up" : "Login"}</Text>
-        </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        {error &&
-        <View style={styles.buttonSecondary}>
-        <Text style= {styles.errorText}>An error has occurred: {error}</Text>
-        </View>}
+          
 
-        
-        <TouchableOpacity style={styles.buttonSecondary} onPress={handleSwitch}>
-          <Text> {isRegister ? "Been here before?" : "New here?" } </Text>
-          <Text style={styles.buttonSecondaryText}>{isRegister ? "Login" : "Sign Up!"}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>{isRegister ? "Sign Up" : "Login"}</Text>
+          </TouchableOpacity>
+
+          {error &&
+          <View style={styles.buttonSecondary}>
+          <Text style= {styles.errorText}>An error has occurred: {error}</Text>
+          </View>}
+
+          
+          <TouchableOpacity style={styles.buttonSecondary} onPress={handleSwitch}>
+            <Text> {isRegister ? "Been here before?" : "New here?" } </Text>
+            <Text style={styles.buttonSecondaryText}>{isRegister ? "Login" : "Sign Up!"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 

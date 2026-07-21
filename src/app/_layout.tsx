@@ -20,9 +20,9 @@ function RootNavigator() {
         </Stack.Protected>
         <Stack.Protected guard={!!claims}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(gathering)/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="getting-started"/>
         </Stack.Protected>
-        <Stack.Screen name="+not-found" />
       </Stack>
   )
 }

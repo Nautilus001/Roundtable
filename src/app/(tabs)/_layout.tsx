@@ -13,7 +13,7 @@ const TabsLayout = () => {
         >
             <Tabs.Protected guard={!!claims}>
                 <Tabs.Screen 
-                    name="create-gathering"
+                    name="(gathering-mgmt)"
                     options={{
                         tabBarIcon: (tabInfo) => {
                             return (

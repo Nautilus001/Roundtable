@@ -45,8 +45,8 @@ const Dashboard = () => {
                         <TouchableOpacity onPress={() => {
                             setActive(item.id ?? "")
                             console.log(item)
-                            router.push({
-                                pathname: '/(tabs)/(dashboard)/[id]',
+                            router.replace({
+                                pathname: '/(gathering)/[id]/dashboard',
                                 params: { id: item.id ?? "" }
                             })
                         }}>
@@ -86,8 +86,10 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         width: '100%',
-        gap: 12, // Native gap spacing between tiles
+        gap: 12,
         marginBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     button: {
         backgroundColor: '#4f46e5',

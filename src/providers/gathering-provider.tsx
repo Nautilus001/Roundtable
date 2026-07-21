@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { GatheringContext } from '@/contexts/gathering-context'
 import { useAuthContext } from '@/hooks/use-auth-context'
-import { getGatherings, postGathering, putGathering, deleteGathering } from '@/services/gathering'
+import { getGatherings, postGathering, putGathering, deleteGathering, joinEventByCode } from '@/services/gathering'
 import { Gathering } from '@/models/gathering'
+import { fetchEventAttendeesWithRoles } from '@/services/profiles'
 
 export const GatheringProvider = ({ children }: { children: React.ReactNode }) => {
 
@@ -80,6 +81,43 @@ export const GatheringProvider = ({ children }: { children: React.ReactNode }) =
         }
     }
 
+    const joinGathering = async (payload: string) => {
+        if(!profile) throw Error()
+        setIsLoading(true)
+        try {
+            const { data, error } = await joinEventByCode(payload)
+            if (error || !data) throw Error()
+            setActive(data.event_id ?? "")
+        } catch (error: any) {
+            console.error("Error on joinGathering: ", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const getGatheringAttendees = async (payload: string) => {
+        setIsLoading(true)
+        try {
+            const { data, error } = await fetchEventAttendeesWithRoles(payload)
+            if (error) throw Error()
+            const formattedAttendees = data?.map(row => {
+                const profile = Array.isArray(row.profiles) 
+                    ? row.profiles[0] 
+                    : row.profiles;
+                return {
+                    first_name: profile?.first_name ?? 'Unknown',
+                    last_name: profile?.last_name ?? 'Attendee',
+                    role: row.role
+                }
+            }) || []
+            return formattedAttendees;
+        } catch (error: any) {
+            console.error("Error on getGatheringAttendees: ", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <GatheringContext.Provider value={{
             isLoading, 
@@ -90,6 +128,8 @@ export const GatheringProvider = ({ children }: { children: React.ReactNode }) =
             createGathering, 
             updateGathering, 
             removeGathering,
+            getGatheringAttendees,
+            joinGathering,
         }}>
             {children}
         </GatheringContext.Provider>

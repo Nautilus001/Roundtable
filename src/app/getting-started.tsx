@@ -4,6 +4,7 @@ import AccountField from '@/components/account/account-field'
 import { useAuthContext } from '@/hooks/use-auth-context'
 import { router } from 'expo-router'
 import { updateProfile } from '@/services/profiles'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const { width } = Dimensions.get('window')
 
@@ -31,50 +32,52 @@ const GettingStarted = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                <Text style={styles.title}>Let's get to know each other!</Text>
-                <Text style={styles.subtitle}>Before we get started, please tell us your name.</Text>
-            </View>
-
-            <View style={styles.formContainer}>
-                <View style={styles.fieldWrapper}>
-                    <Text style={styles.label}>First Name</Text>
-                    <AccountField 
-                        placeholder={'Enter your first name'} 
-                        value={firstName} 
-                        setValue={setFirstName} 
-                        isEdit={true}
-                    />
+        <SafeAreaView>
+            <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                    <Text style={styles.title}>Let's get to know each other!</Text>
+                    <Text style={styles.subtitle}>Before we get started, please tell us your name.</Text>
                 </View>
 
-                <View style={styles.fieldWrapper}>
-                    <Text style={styles.label}>Last Name</Text>
-                    <AccountField 
-                        placeholder={'Enter your last name'} 
-                        value={lastName} 
-                        setValue={setLastName} 
-                        isEdit={true}
-                    />
-                </View>
-
-                {error && (
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>Please do not leave fields blank.</Text>
+                <View style={styles.formContainer}>
+                    <View style={styles.fieldWrapper}>
+                        <Text style={styles.label}>First Name</Text>
+                        <AccountField 
+                            placeholder={'Enter your first name'} 
+                            value={firstName} 
+                            setValue={setFirstName} 
+                            isEdit={true}
+                        />
                     </View>
-                )}
-            </View>
 
-            <View style={styles.footerContainer}>
-                <TouchableOpacity 
-                    style={styles.button} 
-                    onPress={handleSubmit}
-                    activeOpacity={0.8}
-                >
-                    <Text style={styles.buttonText}>Let's Go!</Text>
-                </TouchableOpacity>
+                    <View style={styles.fieldWrapper}>
+                        <Text style={styles.label}>Last Name</Text>
+                        <AccountField 
+                            placeholder={'Enter your last name'} 
+                            value={lastName} 
+                            setValue={setLastName} 
+                            isEdit={true}
+                        />
+                    </View>
+
+                    {error && (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>Please do not leave fields blank.</Text>
+                        </View>
+                    )}
+                </View>
+
+                <View style={styles.footerContainer}>
+                    <TouchableOpacity 
+                        style={styles.button} 
+                        onPress={handleSubmit}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.buttonText}>Let's Go!</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
