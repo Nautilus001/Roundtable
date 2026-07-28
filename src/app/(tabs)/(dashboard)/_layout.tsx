@@ -7,13 +7,6 @@ function DashboardNavigator() {
   return (
       <Stack initialRouteName="dashboard" screenOptions={{headerShown: false}}>
             <Stack.Screen name="dashboard" options={{ headerShown: false }} />
-            <Stack.Screen 
-                name="[id]" 
-                options={{ 
-                    headerShown: false,
-                    title: "Gathering Details" 
-                }} 
-            />
       </Stack>
   )
 }

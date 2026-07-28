@@ -81,20 +81,6 @@ export const GatheringProvider = ({ children }: { children: React.ReactNode }) =
         }
     }
 
-    const joinGathering = async (payload: string) => {
-        if(!profile) throw Error()
-        setIsLoading(true)
-        try {
-            const { data, error } = await joinEventByCode(payload)
-            if (error || !data) throw Error()
-            setActive(data.event_id ?? "")
-        } catch (error: any) {
-            console.error("Error on joinGathering: ", error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
     const getGatheringAttendees = async (payload: string) => {
         setIsLoading(true)
         try {
@@ -129,7 +115,6 @@ export const GatheringProvider = ({ children }: { children: React.ReactNode }) =
             updateGathering, 
             removeGathering,
             getGatheringAttendees,
-            joinGathering,
         }}>
             {children}
         </GatheringContext.Provider>

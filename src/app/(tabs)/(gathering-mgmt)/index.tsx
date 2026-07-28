@@ -12,14 +12,15 @@ import {
 import { router } from 'expo-router'
 import { useGatheringContext } from '@/hooks/use-gathering-context'
 import { useAuthContext } from '@/hooks/use-auth-context' 
+import { joinEventByCode } from '@/services/gathering'
 
 export default function WelcomeIndex() {
     const [eventCode, setEventCode] = useState('')
     const [errorMsg, setErrorMsg] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     
-    const { joinGathering } = useGatheringContext()
     const { profile } = useAuthContext() 
+    const { setActive, fetchGatherings } = useGatheringContext()
 
     const handleTextChange = (text: string) => {
         setErrorMsg('')
@@ -33,34 +34,32 @@ export default function WelcomeIndex() {
     }
 
     const handleJoin = async () => {
-        console.log(eventCode);
         setIsLoading(true);
         setErrorMsg('');
 
         try {
-            const { data, error } = await joinGathering(eventCode);
+            const { data, error } = await joinEventByCode(eventCode);
 
             if (error) {
-                console.error('Database error:', error.message);
-                setErrorMsg(error.message || 'We couldn’t find that event. Double-check your code.');
+                console.error('RPC Error:', error.message);
+                setErrorMsg('Something went wrong connecting to the server.');
                 return;
             }
 
-            if (!data || data.length === 0) {
-                setErrorMsg('Something went wrong. Please try again.');
+            if (!data || !data.success) {
+                console.warn('Action failed:', data?.message);
+                setErrorMsg(data?.message || 'We couldn’t find that event. Double-check your code.');
                 return;
             }
-
-            const joinedEvent = data[0];
-            router.push({
-                pathname: '/(tabs)/(dashboard)/dashboard',
-                params: { id: joinedEvent.id }
-            });
+            await fetchGatherings()
+            setActive(data.event_id ?? "")
+            router.push(`/(gathering)/${data.event_id}/dashboard`);
 
         } catch (unexpectedError) {
             console.error('App-level unexpected crash:', unexpectedError);
             setErrorMsg('Unexpected error, please try again later.');
         } finally {
+            
             setIsLoading(false);
         }
     };
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         borderRadius: 16,
         padding: 24,
-        shadowColor: '#000',
+        color: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
         shadowRadius: 12,

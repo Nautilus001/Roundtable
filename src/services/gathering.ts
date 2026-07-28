@@ -69,13 +69,13 @@ export async function joinEventByCode(eventCode: string) : Promise<JoinEventRetu
     });
 
     if (error) {
-    console.error('RPC Error:', error.message);
-    } else if (!data.success) {
-    console.warn('Action failed:', data.message);
+        console.error('RPC Error:', error.message);
+    } else if (!data?.success) {
+        console.warn('Action failed:', data.message);
     } else {
-    console.log('Successfully joined event:', data.event_id);
+        console.log('Successfully joined event:', data.event_id);
     }
-
+    
     return { data, error }
 }
 
