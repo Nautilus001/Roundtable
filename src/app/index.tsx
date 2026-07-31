@@ -53,7 +53,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView  style={styles.container}>
-      <View>
+      <View style={styles.container}>
 
         <View style={styles.logoContainer}>
           <TouchableOpacity onPress={handleRotate}>
@@ -78,9 +78,7 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
-
-          
-
+    
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>{isRegister ? "Sign Up" : "Login"}</Text>
           </TouchableOpacity>
@@ -104,6 +102,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
