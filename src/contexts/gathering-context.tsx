@@ -1,7 +1,7 @@
 import { Gathering } from '@/models/gathering'
 import { createContext } from 'react'
 
-export type GatheringContextType = {
+interface GatheringContextType {
   gatherings: Gathering[] | null
   activeGathering: Gathering | null
   isLoading: boolean
