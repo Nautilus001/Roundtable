@@ -26,16 +26,9 @@ export async function fetchProfile(userID: string) {
 }
 
 export async function fetchEventAttendeesWithRoles(eventID: string) {
-    const { data, error } = await supabase
-        .from('roles')
-        .select(`
-            role,
-            profiles (
-                first_name,
-                last_name
-            )
-        `)
-        .eq('event_id', eventID)
+    const { data, error } = await supabase.rpc('get_event_members', {
+        p_event_id: eventID
+    });
     
     return { data, error }
 }

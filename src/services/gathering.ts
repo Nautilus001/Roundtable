@@ -2,7 +2,7 @@ import {EventRole, Gathering} from "@/models/gathering"
 import { supabase } from "./supabase"
 
 interface GatheringsReturnType {
-    data: Gathering[] | null
+    data: Gathering[] | Gathering | null
     error: Error | null
 }
 

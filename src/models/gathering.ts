@@ -1,3 +1,5 @@
+import { Item } from "./item"
+
 export type EventRole = 'OWNER' | 'JUDGE' | 'VOTER'
 export type Attire = 'BLACK TIE' | 'CASUAL'
 
@@ -11,4 +13,5 @@ export interface Gathering {
     event_code?: string
     role?: EventRole
     active?: boolean
+    items?: Item[]
 }
