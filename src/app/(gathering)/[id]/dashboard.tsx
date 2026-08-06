@@ -11,7 +11,7 @@ import CountdownWidget from '@/components/gathering/countdown-widget'
 import AttendeeTile from '@/components/gathering/attendee-tile'
 import ItemTile from '@/components/item/item-tile'
 import { getItems } from '@/services/items'
-import { AddItemModal } from '@/components/item/add-item-modal'
+import { ItemModal } from '@/components/item/item-modal'
 
 interface Attendee {
     first_name: string
@@ -198,7 +198,7 @@ const GatheringDetails = () => {
                 )}
             </ScrollView>
             {activeGathering?.id && (
-                <AddItemModal 
+                <ItemModal 
                     visible={isAddModalOpen} 
                     gatheringId={activeGathering.id}
                     onClose={() => setIsAddModalOpen(false)}

@@ -1,8 +1,9 @@
+// src/components/item/item-tile.tsx
 import React, { useState } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import { Item } from '@/models/item'
-import { putItem } from '@/services/items'
 import { useGatheringContext } from '@/hooks/use-gathering-context'
+import { ItemModal } from '@/components/item/item-modal' // <-- Import the new modal
 
 interface ItemTileProps {
   item: Item;
@@ -12,12 +13,9 @@ interface ItemTileProps {
 }
 
 export const ItemTile: React.FC<ItemTileProps> = ({ item, onItemUpdated, onItemRemoved, canEdit = true }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   
-  const [editName, setEditName] = useState(item.name);
-  const [editCategoryId, setEditCategoryId] = useState(item.category_id);
   const { removeItem } = useGatheringContext();
 
   const formattedDate = new Date(item.created_at || Date.now()).toLocaleString([], {
@@ -26,50 +24,19 @@ export const ItemTile: React.FC<ItemTileProps> = ({ item, onItemUpdated, onItemR
     year: 'numeric',
   });
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    
-    const updatedPayload: Item = {
-      ...item,
-      name: editName,
-      category_id: editCategoryId,
-    };
-
-    const { data, error } = await putItem(updatedPayload);
-    
-    setIsSaving(false);
-
-    if (error) {
-      console.error('Failed to save item:', error.message);
-      Alert.alert('Error', 'Failed to save item updates.');
-      return;
-    }
-
-    setIsEditing(false);
-    if (onItemUpdated && data) {
-      onItemUpdated(data as Item);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditName(item.name);
-    setEditCategoryId(item.category_id);
-    setIsEditing(false);
-  };
-
   const executeRemove = async () => {
-  setIsDeleting(true);
-  try {
-    await removeItem(item);
-    if (onItemRemoved) {
-      onItemRemoved(item);
+    setIsDeleting(true);
+    try {
+      await removeItem(item);
+      if (onItemRemoved) {
+        onItemRemoved(item);
+      }
+    } catch (error: any) {
+      console.error("Error removing item: ", error.message);
+      Alert.alert('Error', error.message || 'Failed to remove item.');
+      setIsDeleting(false);
     }
-  } catch (error: any) {
-    console.error("Error removing item: ", error.message);
-    Alert.alert('Error', error.message || 'Failed to remove item.');
-    setIsDeleting(false);
-  }
-};
+  };
 
   const handleRemove = () => {
     Alert.alert(
@@ -82,79 +49,53 @@ export const ItemTile: React.FC<ItemTileProps> = ({ item, onItemUpdated, onItemR
     );
   };
 
-  if (isEditing) {
-    return (
-      <View style={styles.tile}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Edit Item</Text>
-        </View>
-
-        <View style={styles.details}>
-          <Text style={styles.label}>Name:</Text>
-          <TextInput 
-            style={styles.input}
-            value={editName}
-            onChangeText={setEditName}
-            placeholder="Item Name"
-            autoFocus
-          />
-
-          <Text style={styles.label}>Category ID:</Text>
-          <TextInput 
-            style={styles.input}
-            value={editCategoryId}
-            onChangeText={setEditCategoryId}
-            placeholder="Category UUID"
-          />
-        </View>
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton} disabled={isSaving}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleSave} style={styles.saveButton} disabled={isSaving}>
-            {isSaving ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <Text style={styles.saveButtonText}>Save</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+  const handleEditSaved = (updatedItem: Item) => {
+    if (onItemUpdated) onItemUpdated(updatedItem);
   }
 
   return (
-    <View style={styles.tile}>
-      <View style={styles.header}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={styles.actionsContainer}>
-          {isDeleting ? (
-            <ActivityIndicator size="small" color="#ff2020" />
-          ) : (
-            canEdit && (
-              <>
-                <TouchableOpacity onPress={() => setIsEditing(true)}>
-                  <Text style={styles.editAction}>Edit</Text>
-                </TouchableOpacity>
+    <>
+      <View style={styles.tile}>
+        <View style={styles.header}>
+          <Text style={styles.name}>{item.name}</Text>
+          <View style={styles.actionsContainer}>
+            {isDeleting ? (
+              <ActivityIndicator size="small" color="#ff2020" />
+            ) : (
+              canEdit && (
+                <>
+                  {/* Triggers Modal */}
+                  <TouchableOpacity onPress={() => setIsEditModalVisible(true)}>
+                    <Text style={styles.editAction}>Edit</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleRemove}>
-                  <Text style={styles.removeAction}>Remove</Text>
-                </TouchableOpacity>
-              </>
-            )
-          )}
+                  <TouchableOpacity onPress={handleRemove}>
+                    <Text style={styles.removeAction}>Remove</Text>
+                  </TouchableOpacity>
+                </>
+              )
+            )}
+          </View>
         </View>
+
+        <Text style={styles.date}>Added: {formattedDate}</Text>
       </View>
 
-      <Text style={styles.date}>Added: {formattedDate}</Text>
-    </View>
+      {/* Embedded Modal Component */}
+      <ItemModal
+        visible={isEditModalVisible}
+        gatheringId={item.gathering_id as string} // Assuming your item has a gathering_id
+        item={item} // <-- Triggers Edit Mode in the modal
+        onClose={() => setIsEditModalVisible(false)}
+        onSave={handleEditSaved}
+      />
+    </>
   );
 }
 
 export default ItemTile;
 
+// Cleaned up styles (removed inline-edit related styles)
 const styles = StyleSheet.create({
   tile: {
     padding: 16,
@@ -177,18 +118,13 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: 'column',
     alignItems: 'flex-end',
-    gap: 12, // Clean 12px vertical spacing between Edit and Remove
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#6b7280',
+    gap: 12, 
   },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
-    flex: 1, // Ensures long names wrap naturally without pushing actions off-screen
+    flex: 1,
     marginRight: 8,
   },
   editAction: {
@@ -206,52 +142,5 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontWeight: '500',
     marginTop: 8,
-  },
-  details: {
-    flexDirection: 'column',
-    gap: 8,
-  },
-  label: {
-    color: '#9ca3af',
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 6,
-    padding: 10,
-    fontSize: 14,
-    color: '#111827',
-    backgroundColor: '#f9fafb',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 16,
-  },
-  cancelButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    justifyContent: 'center',
-  },
-  cancelButtonText: {
-    color: '#4b5563',
-    fontWeight: '600',
-  },
-  saveButton: {
-    backgroundColor: '#4f46e5',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  saveButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
   },
 });

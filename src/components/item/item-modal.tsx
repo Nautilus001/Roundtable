@@ -1,4 +1,3 @@
-// components/gathering/add-item-modal.tsx
 import React, { useEffect, useState } from 'react'
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Platform } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
@@ -6,14 +5,15 @@ import { postItem } from '@/services/items'
 import { getCategories, Category } from '@/services/categories'
 import { Item } from '@/models/item'
 
-interface AddItemModalProps {
+interface ItemModalProps {
   visible: boolean
   gatheringId: string
+  item?: Item
   onClose: () => void
-  onItemAdded: (newItem: Item) => void
+  onSave: (savedItem: Item) => void
 }
 
-export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId, onClose, onItemAdded }) => {
+export const ItemModal: React.FC<ItemModalProps> = ({ visible, gatheringId, onClose, item, onSave }) => {
   const [name, setName] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
@@ -21,8 +21,13 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  const isEditMode = !!item;
+
   useEffect(() => {
     if (visible) {
+      setName(item?.name || '')
+      setCategoryId(item?.category_id || '')
+
       const loadCategories = async () => {
         setIsFetchingCategories(true)
         const { data, error } = await getCategories()
@@ -34,14 +39,18 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
         }
 
         setCategories(data)
-        if (data.length > 0 && !categoryId) {
+        if (data.length > 0 && !item?.category_id) {
           setCategoryId(data[0].id)
         }
       }
 
       loadCategories()
+    } else {
+      setName('')
+      setCategoryId('')
+      setErrorMsg(null)
     }
-  }, [visible])
+  }, [visible, item])
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -57,22 +66,36 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
     setIsLoading(true)
     setErrorMsg(null)
 
-    const payload: Partial<Item> = {
-      name: name.trim(),
-      category_id: categoryId,
-      gathering_id: gatheringId,
+    if (isEditMode && item) {
+      const payload: Item = {
+        ...item,
+        name: name.trim(),
+        category_id: categoryId,
+      }
+      const { data, error } = await putItem(payload)
+      setIsLoading(false)
+
+      if (error || !data) {
+        setErrorMsg(error?.message || 'Failed to update item.')
+        return
+      }
+      onSave(data as Item)
+    } else {
+      const payload: Partial<Item> = {
+        name: name.trim(),
+        category_id: categoryId,
+        gathering_id: gatheringId,
+      }
+      const { data, error } = await postItem(payload as Item)
+      setIsLoading(false)
+
+      if (error || !data) {
+        setErrorMsg(error?.message || 'Failed to add item.')
+        return
+      }
+      onSave(data as Item)
     }
-
-    const { data, error } = await postItem(payload as Item)
-    setIsLoading(false)
-
-    if (error || !data) {
-      setErrorMsg(error?.message || 'Failed to add item.')
-      return
-    }
-
-    setName('')
-    onItemAdded(data as Item)
+    
     onClose()
   }
 
@@ -80,11 +103,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.title}>Add New Item</Text>
+          <Text style={styles.title}>{isEditMode ? 'Edit Item' : 'Add New Item'}</Text>
 
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
-          {/* Item Name Input */}
           <Text style={styles.label}>Item Name</Text>
           <TextInput
             style={styles.input}
@@ -93,7 +115,6 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
             placeholder="e.g. Ribeye Steak"
           />
 
-          {/* Category Dropdown */}
           <Text style={styles.label}>Category</Text>
           {isFetchingCategories ? (
             <ActivityIndicator style={styles.loader} color="#4f46e5" size="small" />
@@ -103,7 +124,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
                 selectedValue={categoryId}
                 onValueChange={(itemValue) => setCategoryId(itemValue)}
                 style={styles.picker}
-                itemStyle={styles.pickerItem} // Sets text color & height for iOS wheel
+                itemStyle={styles.pickerItem}
               >
                 {categories.map((cat) => (
                   <Picker.Item key={cat.id} label={cat.name} value={cat.id} color="#111827" />
@@ -112,13 +133,8 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
             </View>
           )}
 
-          {/* Action Buttons */}
           <View style={styles.buttonRow}>
-            <TouchableOpacity 
-              style={styles.cancelButton} 
-              onPress={onClose} 
-              disabled={isLoading}
-            >
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={isLoading}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
 
@@ -130,7 +146,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({ visible, gatheringId
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Text style={styles.submitText}>Add Item</Text>
+                <Text style={styles.submitText}>{isEditMode ? 'Save Changes' : 'Add Item'}</Text>
               )}
             </TouchableOpacity>
           </View>
